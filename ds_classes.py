@@ -9,13 +9,13 @@ class LinkedList:
         self.tail = self.head
         self.length = 1
 
-    def printList(self):
+    def __str__(self):
         currNode = self.head
-        myArr = []
+        myArr = ""
         while not currNode is None:
-            myArr.append(currNode.value)
+            myArr += str(currNode.value) + "\n"
             currNode = currNode.next
-        print(myArr)
+        return str(myArr)
 
     def Traverse(self, target):
         index = 0

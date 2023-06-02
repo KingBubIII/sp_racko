@@ -12,4 +12,4 @@ def setup(size):
             deck.append(i)
         elif pos < deck.length:
             deck.insert(pos, i)
-    deck.printList()
+    print(deck)
