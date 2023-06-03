@@ -13,6 +13,10 @@ class LinkedList:
         currNode = self.head
         myArr = ""
         while not currNode is None:
+            if self.head == currNode:
+                myArr+="->"
+            else:
+                myArr+="  "
             myArr += str(currNode.value) + "\n"
             currNode = currNode.next
         return str(myArr)
