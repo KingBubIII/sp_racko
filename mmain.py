@@ -14,14 +14,16 @@ def setup(size):
             deck.insert(pos, i)
     return deck
 
-def bottom():
+def topToBottom(deck):
     temp = deck.head
-    deck.head = deck.head.next
+    deck.head = temp.next
     temp.next = deck.tail.next
     deck.tail.next = temp
     deck.tail = temp
+    
+    return deck
 
-def nPlus1():
+def topToNPlusOne(deck):
     index = (deck.head.value+1) % deck.length
     if index > 0:
         pre = deck.head
@@ -34,20 +36,48 @@ def nPlus1():
         deck.head = deck.head.next
         pre.next = temp
         temp.next = aft
+        if aft == None:
+            deck.tail = temp
+    
+    return deck
+
+def winCheck(deck):
+    win = True
+    curr_node = deck.head
+    if curr_node.next.value > curr_node.value:
+        while not curr_node.next == None:
+            if curr_node.next.value < curr_node.value:
+                win = False
+                break
+            curr_node = curr_node.next
+    elif curr_node.next.value < curr_node.value:
+        while not curr_node.next == None:
+            if curr_node.next.value > curr_node.value:
+                win = False
+                break
+            curr_node = curr_node.next
+    
+    return win
 
 if __name__ == __name__:
     win = False
     deck = setup(4)
 
     while not win:
+        print("\n"*(deck.length + 4))
         print(deck)
         action = input("1) Bottom\n2) Position = n+1\nWhat would you like to do? ")
 
         if not action.isnumeric():
             print("You did not enter a number. Try again")
         elif int(action) == 1:
-            bottom()
+            deck = topToBottom(deck)
         elif int(action) == 2:
-            nPlus1()
+            deck = topToNPlusOne(deck)
         else:
             print("You did not chose an acceptable choice. Try again")
+        
+        if winCheck(deck):
+            print(deck)
+            print("You win!")
+            break

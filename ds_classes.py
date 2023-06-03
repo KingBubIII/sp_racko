@@ -10,7 +10,7 @@ class LINKEDLIST:
         self.length = 1
 
     def __str__(self):
-        currNode = self.head
+        curr_node = self.head
         myArr = ""
         while not curr_node is None:
             if self.head == curr_node:
