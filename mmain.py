@@ -2,7 +2,7 @@ from ds_classes import *
 import random
 
 def setup(size):
-    deck = LinkedList(1)
+    deck = LINKEDLIST(1)
     for i in range(2, size+1):
         pos = random.randint(0,deck.length)
         

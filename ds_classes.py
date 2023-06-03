@@ -1,54 +1,54 @@
-class Node:
+class NODE:
     def __init__(self, value) -> None:
         self.value = value
         self.next = None
 
-class LinkedList:
+class LINKEDLIST:
     def __init__(self, init_value) -> None:
-        self.head = Node(init_value)
+        self.head = NODE(init_value)
         self.tail = self.head
         self.length = 1
 
     def __str__(self):
         currNode = self.head
         myArr = ""
-        while not currNode is None:
-            if self.head == currNode:
+        while not curr_node is None:
+            if self.head == curr_node:
                 myArr+="->"
             else:
                 myArr+="  "
-            myArr += str(currNode.value) + "\n"
-            currNode = currNode.next
+            myArr += str(curr_node.value) + "\n"
+            curr_node = curr_node.next
         return str(myArr)
 
     def Traverse(self, target):
         index = 0
-        currNode = self.head
+        curr_node = self.head
 
         while not index == target:
-            currNode = currNode.next
+            curr_node = curr_node.next
             index += 1
 
-        return currNode
+        return curr_node
     
     def append(self, new_value):
-        newNode = Node(new_value)
-        self.tail.next = newNode
-        self.tail = newNode
+        new_node = NODE(new_value)
+        self.tail.next = new_node
+        self.tail = new_node
         self.length += 1
     
     def prepend(self, new_value):
-        newNode = Node(new_value)
-        newNode.next = self.head
-        self.head = newNode
+        new_node = NODE(new_value)
+        new_node.next = self.head
+        self.head = new_node
         self.length += 1
 
     def insert(self, targetI, new_value):        
-        newNode = Node(new_value)
+        new_node = NODE(new_value)
         pre = self.Traverse(targetI-1)
 
-        newNode.next = pre.next
-        pre.next = newNode
+        new_node.next = pre.next
+        pre.next = new_node
         
         self.length += 1
         return
@@ -66,11 +66,11 @@ class LinkedList:
         currNode = self.head
         prevNode = None
         while self.tail.next == None:
-            tempNode = currNode.next
-            currNode.next = prevNode
+            temp_node = curr_node.next
+            curr_node.next = prevNode
 
-            prevNode = currNode
-            currNode = tempNode
-        tempNode = self.head
+            prevNode = curr_node
+            curr_node = temp_node
+        temp_node = self.head
         self.head = self.tail
-        self.tail = tempNode
+        self.tail = temp_node
