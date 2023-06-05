@@ -4,10 +4,10 @@ class NODE:
         self.next = None
 
 class LINKEDLIST:
-    def __init__(self, init_value) -> None:
-        self.head = NODE(init_value)
+    def __init__(self, init_value=None) -> None:
+        self.head = NODE(init_value) if init_value else None
         self.tail = self.head
-        self.length = 1
+        self.length = 1 if init_value else 0
 
     def __str__(self):
         curr_node = self.head

@@ -3,6 +3,7 @@ import random
 
 def setup(size):
     deck = LINKEDLIST(1)
+    undo_stack = LINKEDLIST()
     for i in range(2, size+1):
         pos = random.randint(0,deck.length)
         
@@ -12,18 +13,27 @@ def setup(size):
             deck.append(i)
         elif pos < deck.length:
             deck.insert(pos, i)
-    return deck
+    return undo_stack, deck
 
-def topToBottom(deck):
+def addToUndoStack(undo_stack, index):
+    if undo_stack.length >= 3:
+        undo_stack.remove(2)
+
+    undo_stack.prepend(index)
+    return undo_stack
+
+def topToBottom(deck, undo_stack):
     temp = deck.head
     deck.head = temp.next
     temp.next = deck.tail.next
     deck.tail.next = temp
     deck.tail = temp
     
-    return deck
+    undo_stack = addToUndoStack(undo_stack, deck.length)
 
-def topToNPlusOne(deck):
+    return undo_stack, deck
+
+def topToNPlusOne(deck, undo_stack):
     index = (deck.head.value+1) % deck.length
     if index > 0:
         pre = deck.head
@@ -38,8 +48,10 @@ def topToNPlusOne(deck):
         temp.next = aft
         if aft == None:
             deck.tail = temp
+
+    undo_stack = addToUndoStack(undo_stack, index+1)
     
-    return deck
+    return undo_stack, deck
 
 def winCheck(deck):
     win = True
@@ -61,7 +73,7 @@ def winCheck(deck):
 
 if __name__ == __name__:
     win = False
-    deck = setup(4)
+    undo_stack, deck = setup(8)
 
     while not win:
         print("\n"*(deck.length + 4))
@@ -71,13 +83,13 @@ if __name__ == __name__:
         if not action.isnumeric():
             print("You did not enter a number. Try again")
         elif int(action) == 1:
-            deck = topToBottom(deck)
+            undo_stack, deck = topToBottom(deck, undo_stack)
         elif int(action) == 2:
-            deck = topToNPlusOne(deck)
+            undo_stack, deck = topToNPlusOne(deck, undo_stack)
         else:
             print("You did not chose an acceptable choice. Try again")
         
-        if winCheck(deck):
-            print(deck)
-            print("You win!")
-            break
+        win = winCheck(deck)
+    
+    print(deck)
+    print("You win!")
