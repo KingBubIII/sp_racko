@@ -22,6 +22,20 @@ def addToUndoStack(undo_stack, index):
     undo_stack.prepend(index)
     return undo_stack
 
+def undo(undo_stack, deck):
+    if undo_stack.length > 0:
+        pre = deck.Traverse(undo_stack.remove(0)-1)            
+        temp = pre.next
+        aft = temp.next
+
+        pre.next = aft
+        temp.next = deck.head
+        deck.head = temp
+    else:
+        print("You have nothing left to undo. Remember the max you can undo at one time is 3.")
+    
+    return undo_stack, deck
+
 def topToBottom(deck, undo_stack):
     temp = deck.head
     deck.head = temp.next
@@ -29,7 +43,7 @@ def topToBottom(deck, undo_stack):
     deck.tail.next = temp
     deck.tail = temp
     
-    undo_stack = addToUndoStack(undo_stack, deck.length)
+    undo_stack = addToUndoStack(undo_stack, deck.length-1)
 
     return undo_stack, deck
 
@@ -49,7 +63,7 @@ def topToNPlusOne(deck, undo_stack):
         if aft == None:
             deck.tail = temp
 
-    undo_stack = addToUndoStack(undo_stack, index+1)
+        undo_stack = addToUndoStack(undo_stack, index)
     
     return undo_stack, deck
 
@@ -73,12 +87,12 @@ def winCheck(deck):
 
 if __name__ == __name__:
     win = False
-    undo_stack, deck = setup(8)
+    undo_stack, deck = setup(4)
 
     while not win:
         print("\n"*(deck.length + 4))
         print(deck)
-        action = input("1) Bottom\n2) Position = n+1\nWhat would you like to do? ")
+        action = input("1) Bottom\n2) Position = n+1\n3) Undo\nWhat would you like to do? ")
 
         if not action.isnumeric():
             print("You did not enter a number. Try again")
@@ -86,6 +100,8 @@ if __name__ == __name__:
             undo_stack, deck = topToBottom(deck, undo_stack)
         elif int(action) == 2:
             undo_stack, deck = topToNPlusOne(deck, undo_stack)
+        elif int(action) == 3:
+            undo_stack, deck = undo(undo_stack, deck)
         else:
             print("You did not chose an acceptable choice. Try again")
         

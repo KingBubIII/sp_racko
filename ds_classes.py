@@ -54,13 +54,18 @@ class LINKEDLIST:
         return
 
     def remove(self, index):
-        pre = self.Traverse(index-1)
-        if pre.next.next == None:
-            self.tail = pre
-        pre.next = pre.next.next
-
         self.length -= 1
-        return
+        if index > 0:
+            pre = self.Traverse(index-1)
+            temp = pre.next.value
+            if pre.next.next == None:
+                self.tail = pre
+            pre.next = pre.next.next
+        else:
+            temp = self.head.value
+            self.head = self.head.next
+        
+        return temp
     
     def reverse(self):
         currNode = self.head
