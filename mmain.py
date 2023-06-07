@@ -1,18 +1,22 @@
 from ds_classes import *
 import random
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from PyQt5.QtGui import QIcon, QPixmap
 
-def setup(size):
-    deck = LINKEDLIST(1)
+def setup(size, qt_class):
+    deck = LINKEDLIST()
     undo_stack = LINKEDLIST()
-    for i in range(2, size+1):
+
+    for i in range(1, size+1):
         pos = random.randint(0,deck.length)
         
-        if pos == 0:
-            deck.prepend(i)
+        if i==1 or pos == 0:
+            deck.prepend(i, qt_class)
         elif pos == deck.length:
-            deck.append(i)
+            deck.append(i, qt_class)
         elif pos < deck.length:
-            deck.insert(pos, i)
+            deck.insert(pos, i, qt_class)
     return undo_stack, deck
 
 def addToUndoStack(undo_stack, index):
@@ -85,13 +89,25 @@ def winCheck(deck):
     
     return win
 
+def showDeck():
+    start_pos = [700,25]
+    curr = deck.head
+    shift_count = 0
+    while not curr == None:
+        curr.qt5_widget.move(start_pos[0]-(50*shift_count), start_pos[1]+(50*shift_count))
+        curr.qt5_widget.lower()
+        curr = curr.next
+        shift_count+=1
+
 if __name__ == __name__:
     win = False
-    undo_stack, deck = setup(4)
+    app = QApplication(sys.argv)
+    ex = App()
+    undo_stack, deck = setup(size=4, qt_class=ex)
 
     while not win:
-        print("\n"*(deck.length + 4))
-        print(deck)
+        showDeck()
+        ex.show()
         action = input("1) Bottom\n2) Position = n+1\n3) Undo\nWhat would you like to do? ")
 
         if not action.isnumeric():
