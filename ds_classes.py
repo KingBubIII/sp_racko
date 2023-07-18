@@ -89,8 +89,35 @@ class LINKEDLIST:
         self.head = self.tail
         self.tail = temp_node
 
-class App(QWidget):
-    def __init__(self):
+    def topToNPlusOne(self):
+        index = (self.head.value+1) % self.length
+        if index > 0:
+            pre = self.head
+            for count in range(index):
+                pre = pre.next
+            
+            aft = pre.next
+            
+            temp = self.head
+            self.head = self.head.next
+            pre.next = temp
+            temp.next = aft
+            if aft == None:
+                self.tail = temp
+
+        return index
+    
+    def topToBottom(self):
+        temp = self.head
+        self.head = temp.next
+        temp.next = self.tail.next
+        self.tail.next = temp
+        self.tail = temp
+
+        return self.length-1
+
+class APP(QWidget):
+    def __init__(self, deck):
         super().__init__()
         self.title = 'Single Player Racko'
         self.left = 100
@@ -98,14 +125,18 @@ class App(QWidget):
         self.width = 1000
         self.height = 750
         self.initUI()
+        self.refenceDeck = deck
+        self.pictureWidgets = self.initPictureWidgets(self.refenceDeck.length)
 
     @pyqtSlot()
     def nPlusOne_on_click(self):
-        print('nPlusOne')
+        index = self.refenceDeck.topToNPlusOne()
+        self.showDeck()
 
     @pyqtSlot()
     def bottom_on_click(self):
-        print('bottom')
+        index = self.refenceDeck.topToBottom()
+        self.showDeck()
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -121,3 +152,34 @@ class App(QWidget):
         nPlusOne_btn.setToolTip('Put current node on bottom of stack')
         nPlusOne_btn.move(100,150)
         nPlusOne_btn.clicked.connect(self.nPlusOne_on_click)
+
+    # This is where the card images will be attached to
+    def initPictureWidgets(self, amount = 1):
+        # the list of widgets to be returned
+        image_widgets = []
+        # the starting position on the qt5 canvas
+        start_pos = [700,25]
+        # creates an object for however long the list is
+        for count in range(amount):
+            # initialize the object
+            label = QLabel(self)
+            # sets image path
+            pixmap = QPixmap()
+            # attaches image to object via path
+            label.setPixmap(pixmap)
+            # moves each image so that corner where card value is displayed
+            label.move(start_pos[0]-(50*count), start_pos[1]+(50*count))
+            # lowers the objects view priority so the stack of images is decending
+            label.lower()
+            # adds item to list
+            image_widgets.append(label)
+        return image_widgets
+    
+    def showDeck(self):
+        curr = self.refenceDeck.head
+        for object in self.pictureWidgets:
+            pixmap = QPixmap(curr.image_path)
+            object.setPixmap(pixmap)
+            curr = curr.next
+        
+        return
