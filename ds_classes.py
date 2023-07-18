@@ -1,18 +1,13 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton
 from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtCore import pyqtSlot
 
 class NODE:
-    def __init__(self, value:int, qt_class) -> None:
+    def __init__(self, value:int) -> None:
         self.value = value
         self.next = None
-        self.qt5_widget = self.initWidget(qt_class)
-
-    def initWidget(self, qt_class) -> None:
-        label = QLabel(qt_class)
-        pixmap = QPixmap('pictures\\{0}_card.png'.format(self.value))
-        label.setPixmap(pixmap)
-        return label
+        self.image_path = 'pictures\\{0}_card.png'.format(self.value)
 
 class LINKEDLIST:
     def __init__(self) -> None:
@@ -42,14 +37,14 @@ class LINKEDLIST:
 
         return curr_node
     
-    def append(self, new_value, qt_class):
-        new_node = NODE(new_value, qt_class)
+    def append(self, new_value):
+        new_node = NODE(new_value)
         self.tail.next = new_node
         self.tail = new_node
         self.length += 1
     
-    def prepend(self, new_value, qt_class=None):
-        new_node = NODE(new_value, qt_class)
+    def prepend(self, new_value):
+        new_node = NODE(new_value)
         new_node.next = self.head
         self.head = new_node
         self.length += 1
@@ -57,8 +52,8 @@ class LINKEDLIST:
         if self.length == 1:
             self.tail = self.head
 
-    def insert(self, targetI, new_value, qt_class):        
-        new_node = NODE(new_value, qt_class)
+    def insert(self, targetI, new_value):        
+        new_node = NODE(new_value)
         pre = self.Traverse(targetI-1)
 
         new_node.next = pre.next
@@ -102,10 +97,27 @@ class App(QWidget):
         self.top = 100
         self.width = 1000
         self.height = 750
-
         self.initUI()
-    
+
+    @pyqtSlot()
+    def nPlusOne_on_click(self):
+        print('nPlusOne')
+
+    @pyqtSlot()
+    def bottom_on_click(self):
+        print('bottom')
+
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
         # self.show()
+
+        bottom_btn = QPushButton('Node to Bottom', self)
+        bottom_btn.setToolTip('This is an example button')
+        bottom_btn.move(100,70)
+        bottom_btn.clicked.connect(self.bottom_on_click)
+
+        nPlusOne_btn = QPushButton('Node to N+1', self)
+        nPlusOne_btn.setToolTip('Put current node on bottom of stack')
+        nPlusOne_btn.move(100,150)
+        nPlusOne_btn.clicked.connect(self.nPlusOne_on_click)

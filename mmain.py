@@ -1,23 +1,47 @@
 from ds_classes import *
 import random
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton
 from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtCore import pyqtSlot
 
 def setup(size, qt_class):
     deck = LINKEDLIST()
     undo_stack = LINKEDLIST()
+    image_widgets = initWidgets(qt_class, size)
 
     for i in range(1, size+1):
         pos = random.randint(0,deck.length)
         
         if i==1 or pos == 0:
-            deck.prepend(i, qt_class)
+            deck.prepend(i)
         elif pos == deck.length:
-            deck.append(i, qt_class)
+            deck.append(i)
         elif pos < deck.length:
-            deck.insert(pos, i, qt_class)
-    return undo_stack, deck
+            deck.insert(pos, i)
+    return undo_stack, deck, image_widgets
+
+# This is where the card images will be attached to
+def initWidgets(qt_class, amount = 1):
+    # the list of widgets to be returned
+    image_widgets = []
+    # the starting position on the qt5 canvas
+    start_pos = [700,25]
+    # creates an object for however long the list is
+    for count in range(amount):
+        # initialize the object
+        label = QLabel(qt_class)
+        # sets image path
+        pixmap = QPixmap()
+        # attaches image to object via path
+        label.setPixmap(pixmap)
+        # moves each image so that corner where card value is displayed
+        label.move(start_pos[0]-(50*count), start_pos[1]+(50*count))
+        # lowers the objects view priority so the stack of images is decending
+        label.lower()
+        # adds item to list
+        image_widgets.append(label)
+    return image_widgets
 
 def addToUndoStack(undo_stack, index):
     if undo_stack.length >= 3:
@@ -89,39 +113,26 @@ def winCheck(deck):
     
     return win
 
-def showDeck():
-    start_pos = [700,25]
+def showDeck(deck, image_widgets):
     curr = deck.head
-    shift_count = 0
-    while not curr == None:
-        curr.qt5_widget.move(start_pos[0]-(50*shift_count), start_pos[1]+(50*shift_count))
-        curr.qt5_widget.lower()
+    for object in image_widgets:
+        pixmap = QPixmap(curr.image_path)
+        object.setPixmap(pixmap)
         curr = curr.next
-        shift_count+=1
+    
+    return deck, image_widgets
 
 if __name__ == __name__:
     win = False
     app = QApplication(sys.argv)
     ex = App()
-    undo_stack, deck = setup(size=4, qt_class=ex)
-
-    while not win:
-        showDeck()
-        ex.show()
-        action = input("1) Bottom\n2) Position = n+1\n3) Undo\nWhat would you like to do? ")
-
-        if not action.isnumeric():
-            print("You did not enter a number. Try again")
-        elif int(action) == 1:
-            undo_stack, deck = topToBottom(deck, undo_stack)
-        elif int(action) == 2:
-            undo_stack, deck = topToNPlusOne(deck, undo_stack)
-        elif int(action) == 3:
-            undo_stack, deck = undo(undo_stack, deck)
-        else:
-            print("You did not chose an acceptable choice. Try again")
-        
-        win = winCheck(deck)
+    undo_stack, deck, image_widgets = setup(size=4, qt_class=ex)
+    deck, image_widgets = showDeck(deck, image_widgets)
+    ex.show()
+    try:
+        sys.exit(app.exec_())
+    except SystemExit:
+        print("closing window")
     
     print(deck)
     print("You win!")
