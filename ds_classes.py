@@ -115,6 +115,24 @@ class LINKEDLIST:
         self.tail = temp
 
         return self.length-1
+    
+    def winCheck(self):
+        win = True
+        curr_node = self.head
+        if curr_node.next.value > curr_node.value:
+            while not curr_node.next == None:
+                if curr_node.next.value < curr_node.value:
+                    win = False
+                    break
+                curr_node = curr_node.next
+        elif curr_node.next.value < curr_node.value:
+            while not curr_node.next == None:
+                if curr_node.next.value > curr_node.value:
+                    win = False
+                    break
+                curr_node = curr_node.next
+        
+        return win
 
 class APP(QWidget):
     def __init__(self, deck):
@@ -132,11 +150,15 @@ class APP(QWidget):
     def nPlusOne_on_click(self):
         index = self.refenceDeck.topToNPlusOne()
         self.showDeck()
+        if self.refenceDeck.winCheck():
+            self.close()
 
     @pyqtSlot()
     def bottom_on_click(self):
         index = self.refenceDeck.topToBottom()
         self.showDeck()
+        if self.refenceDeck.winCheck():
+            self.close()
 
     def initUI(self):
         self.setWindowTitle(self.title)

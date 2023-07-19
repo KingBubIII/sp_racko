@@ -41,24 +41,6 @@ def undo(undo_stack, deck):
     
     return undo_stack, deck
 
-def winCheck(deck):
-    win = True
-    curr_node = deck.head
-    if curr_node.next.value > curr_node.value:
-        while not curr_node.next == None:
-            if curr_node.next.value < curr_node.value:
-                win = False
-                break
-            curr_node = curr_node.next
-    elif curr_node.next.value < curr_node.value:
-        while not curr_node.next == None:
-            if curr_node.next.value > curr_node.value:
-                win = False
-                break
-            curr_node = curr_node.next
-    
-    return win
-
 if __name__ == __name__:
     win = False
     app = QApplication(sys.argv)
@@ -67,7 +49,4 @@ if __name__ == __name__:
     
     ex.showDeck()
     ex.show()
-    try:
-        sys.exit(app.exec_())
-    except SystemExit:
-        print("closing window")
+    app.exec_()
