@@ -39,8 +39,12 @@ class LINKEDLIST:
     
     def append(self, new_value):
         new_node = NODE(new_value)
-        self.tail.next = new_node
-        self.tail = new_node
+        if self.tail is None:
+            self.head = new_node
+            self.tail = new_node
+        else:
+            self.tail.next = new_node
+            self.tail = new_node
         self.length += 1
     
     def prepend(self, new_value):
@@ -63,7 +67,6 @@ class LINKEDLIST:
         return
 
     def remove(self, index):
-        self.length -= 1
         if index > 0:
             pre = self.Traverse(index-1)
             temp = pre.next.value
@@ -73,7 +76,12 @@ class LINKEDLIST:
         else:
             temp = self.head.value
             self.head = self.head.next
-        
+
+        self.length -= 1
+        if self.length == 1:
+            self.tail = self.head
+        elif self.length == 0:
+            self.tail = None
         return temp
     
     def reverse(self):
@@ -90,7 +98,7 @@ class LINKEDLIST:
         self.tail = temp_node
 
     def topToNPlusOne(self):
-        index = (self.head.value+1) % self.length
+        index = (self.head.value) % self.length
         if index > 0:
             pre = self.head
             for count in range(index):
@@ -134,8 +142,12 @@ class LINKEDLIST:
         
         return win
 
+    def undo(self, index):
+        temp_val = self.remove(index)
+        self.prepend(temp_val)
+
 class APP(QWidget):
-    def __init__(self, deck):
+    def __init__(self, deck, undo_stack):
         super().__init__()
         self.title = 'Single Player Racko'
         self.left = 100
@@ -144,11 +156,13 @@ class APP(QWidget):
         self.height = 750
         self.initUI()
         self.refenceDeck = deck
+        self.undo_stack = undo_stack
         self.pictureWidgets = self.initPictureWidgets(self.refenceDeck.length)
 
     @pyqtSlot()
     def nPlusOne_on_click(self):
         index = self.refenceDeck.topToNPlusOne()
+        self.addToUndoStack(index)
         self.showDeck()
         if self.refenceDeck.winCheck():
             self.close()
@@ -156,9 +170,20 @@ class APP(QWidget):
     @pyqtSlot()
     def bottom_on_click(self):
         index = self.refenceDeck.topToBottom()
+        self.addToUndoStack(index)
         self.showDeck()
         if self.refenceDeck.winCheck():
             self.close()
+
+    @pyqtSlot()
+    def undo_on_click(self):
+        # print(self.undo_stack.length)
+        if self.undo_stack.length > 0:
+            self.refenceDeck.undo(self.undo_stack.remove(0))
+        else:
+            print("You have nothing left to undo. Remember the max you can undo at one time is 3.")
+
+        self.showDeck()
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -172,8 +197,13 @@ class APP(QWidget):
 
         nPlusOne_btn = QPushButton('Node to N+1', self)
         nPlusOne_btn.setToolTip('Put current node on bottom of stack')
-        nPlusOne_btn.move(100,150)
+        nPlusOne_btn.move(100,140)
         nPlusOne_btn.clicked.connect(self.nPlusOne_on_click)
+
+        undo_btn = QPushButton('Undo', self)
+        undo_btn.setToolTip('Put last node moved back ontop of deck')
+        undo_btn.move(100,210)
+        undo_btn.clicked.connect(self.undo_on_click)
 
     # This is where the card images will be attached to
     def initPictureWidgets(self, amount = 1):
@@ -205,3 +235,9 @@ class APP(QWidget):
             curr = curr.next
         
         return
+    
+    def addToUndoStack(self, index):
+        if self.undo_stack.length >= 3:
+            self.undo_stack.remove(2)
+
+        self.undo_stack.prepend(index)

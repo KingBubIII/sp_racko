@@ -20,32 +20,11 @@ def setup(size):
             deck.insert(pos, i)
     return undo_stack, deck
 
-def addToUndoStack(undo_stack, index):
-    if undo_stack.length >= 3:
-        undo_stack.remove(2)
-
-    undo_stack.prepend(index)
-    return undo_stack
-
-def undo(undo_stack, deck):
-    if undo_stack.length > 0:
-        pre = deck.Traverse(undo_stack.remove(0)-1)            
-        temp = pre.next
-        aft = temp.next
-
-        pre.next = aft
-        temp.next = deck.head
-        deck.head = temp
-    else:
-        print("You have nothing left to undo. Remember the max you can undo at one time is 3.")
-    
-    return undo_stack, deck
-
 if __name__ == __name__:
     win = False
     app = QApplication(sys.argv)
     undo_stack, deck = setup(size=4)
-    ex = APP(deck)
+    ex = APP(deck, undo_stack)
     
     ex.showDeck()
     ex.show()
