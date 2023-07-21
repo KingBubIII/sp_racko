@@ -166,10 +166,11 @@ class APP(QWidget):
         self.top = 100
         self.width = 1000
         self.height = 750
-        self.initUI()
+        self.initButtons()
         self.refenceDeck = deck
         self.undo_stack = undo_stack
-        self.pictureWidgets = self.initPictureWidgets(self.refenceDeck.length)
+        self.pictureWidgets = self.initNodePictures(self.refenceDeck.length)
+        self.hover_arrow = self.initHoverPicture()
 
     @pyqtSlot()
     def nPlusOne_on_click(self):
@@ -203,7 +204,7 @@ class APP(QWidget):
     def buttonStopHovering(self):
         print('Left')
 
-    def initUI(self):
+    def initButtons(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
         # self.show()
@@ -233,11 +234,11 @@ class APP(QWidget):
         undo_btn.leaved.connect(self.buttonStopHovering)
 
     # This is where the card images will be attached to
-    def initPictureWidgets(self, amount = 1):
+    def initNodePictures(self, amount = 1):
         # the list of widgets to be returned
         image_widgets = []
         # the starting position on the qt5 canvas
-        start_pos = [700,25]
+        start_pos = [700,75]
         # creates an object for however long the list is
         for count in range(amount):
             # initialize the object
@@ -253,6 +254,22 @@ class APP(QWidget):
             # adds item to list
             image_widgets.append(label)
         return image_widgets
+    
+    def initHoverPicture(self):
+        # initialize the object
+        arrow = QLabel(self)
+        # sets image path
+        pixmap = QPixmap('pictures\\arrow.png')
+        pixmap = pixmap.scaled(50, 50)
+        # attaches image to object via path
+        arrow.setPixmap(pixmap)
+        arrow.resize(pixmap.width(), pixmap.height())
+        # moves each image so that corner where card value is displayed
+        arrow.move(700,25)
+        # lowers the objects view priority so the stack of images is decending
+        arrow.lower()
+
+        return arrow
     
     def showDeck(self):
         curr = self.refenceDeck.head
