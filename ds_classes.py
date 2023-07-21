@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 
 class NODE:
     def __init__(self, value:int) -> None:
@@ -146,6 +146,18 @@ class LINKEDLIST:
         temp_val = self.remove(index)
         self.prepend(temp_val)
 
+class BUTTON(QPushButton):
+    entered = pyqtSignal()
+    leaved = pyqtSignal()
+
+    def enterEvent(self, event):
+        super().enterEvent(event)
+        self.entered.emit()
+
+    def leaveEvent(self, event):
+        super().leaveEvent(event)
+        self.leaved.emit()
+
 class APP(QWidget):
     def __init__(self, deck, undo_stack):
         super().__init__()
@@ -185,25 +197,40 @@ class APP(QWidget):
 
         self.showDeck()
 
+    def buttonHover(self):
+        print('Entered')
+
+    def buttonStopHovering(self):
+        print('Left')
+
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
         # self.show()
 
-        bottom_btn = QPushButton('Node to Bottom', self)
+        bottom_btn = BUTTON(self)
+        bottom_btn.setText('Node to Bottom')
         bottom_btn.setToolTip('This is an example button')
         bottom_btn.move(100,70)
         bottom_btn.clicked.connect(self.bottom_on_click)
+        bottom_btn.entered.connect(self.buttonHover)
+        bottom_btn.leaved.connect(self.buttonStopHovering)
 
-        nPlusOne_btn = QPushButton('Node to N+1', self)
+        nPlusOne_btn = BUTTON(self)
+        nPlusOne_btn.setText('Node to N+1')
         nPlusOne_btn.setToolTip('Put current node on bottom of stack')
         nPlusOne_btn.move(100,140)
         nPlusOne_btn.clicked.connect(self.nPlusOne_on_click)
+        nPlusOne_btn.entered.connect(self.buttonHover)
+        nPlusOne_btn.leaved.connect(self.buttonStopHovering)
 
-        undo_btn = QPushButton('Undo', self)
+        undo_btn = BUTTON(self)
+        undo_btn.setText('Undo')
         undo_btn.setToolTip('Put last node moved back ontop of deck')
         undo_btn.move(100,210)
         undo_btn.clicked.connect(self.undo_on_click)
+        undo_btn.entered.connect(self.buttonHover)
+        undo_btn.leaved.connect(self.buttonStopHovering)
 
     # This is where the card images will be attached to
     def initPictureWidgets(self, amount = 1):
