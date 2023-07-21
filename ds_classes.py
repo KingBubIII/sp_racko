@@ -166,6 +166,9 @@ class APP(QWidget):
         self.top = 100
         self.width = 1000
         self.height = 750
+        self.deck_pos_start_x = 700
+        self.deck_pos_start_y = 75
+        self.card_offset = 50
         self.initButtons()
         self.refenceDeck = deck
         self.undo_stack = undo_stack
@@ -179,6 +182,7 @@ class APP(QWidget):
         self.showDeck()
         if self.refenceDeck.winCheck():
             self.close()
+        self.nPlusOneButtonHover()
 
     @pyqtSlot()
     def bottom_on_click(self):
@@ -187,6 +191,7 @@ class APP(QWidget):
         self.showDeck()
         if self.refenceDeck.winCheck():
             self.close()
+        self.bottomButtonHover()
 
     @pyqtSlot()
     def undo_on_click(self):
@@ -198,11 +203,20 @@ class APP(QWidget):
 
         self.showDeck()
 
-    def buttonHover(self):
-        print('Entered')
+    def bottomButtonHover(self):
+        x = self.deck_pos_start_x-(self.card_offset*(self.refenceDeck.length-1))
+        y = (self.deck_pos_start_y+(self.card_offset*(self.refenceDeck.length-1)))-self.card_offset
+        self.hover_arrow.move(x, y)
+        self.hover_arrow.setVisible(True)
+
+    def nPlusOneButtonHover(self):
+        x = self.deck_pos_start_x-(self.card_offset*(self.refenceDeck.head.value % self.refenceDeck.length))
+        y = (self.deck_pos_start_y+(self.card_offset*(self.refenceDeck.head.value % self.refenceDeck.length)))-self.card_offset
+        self.hover_arrow.move(x, y)
+        self.hover_arrow.setVisible(True)
 
     def buttonStopHovering(self):
-        print('Left')
+        self.hover_arrow.setVisible(False)
 
     def initButtons(self):
         self.setWindowTitle(self.title)
@@ -214,7 +228,7 @@ class APP(QWidget):
         bottom_btn.setToolTip('This is an example button')
         bottom_btn.move(100,70)
         bottom_btn.clicked.connect(self.bottom_on_click)
-        bottom_btn.entered.connect(self.buttonHover)
+        bottom_btn.entered.connect(self.bottomButtonHover)
         bottom_btn.leaved.connect(self.buttonStopHovering)
 
         nPlusOne_btn = BUTTON(self)
@@ -222,7 +236,7 @@ class APP(QWidget):
         nPlusOne_btn.setToolTip('Put current node on bottom of stack')
         nPlusOne_btn.move(100,140)
         nPlusOne_btn.clicked.connect(self.nPlusOne_on_click)
-        nPlusOne_btn.entered.connect(self.buttonHover)
+        nPlusOne_btn.entered.connect(self.nPlusOneButtonHover)
         nPlusOne_btn.leaved.connect(self.buttonStopHovering)
 
         undo_btn = BUTTON(self)
@@ -230,7 +244,7 @@ class APP(QWidget):
         undo_btn.setToolTip('Put last node moved back ontop of deck')
         undo_btn.move(100,210)
         undo_btn.clicked.connect(self.undo_on_click)
-        undo_btn.entered.connect(self.buttonHover)
+        # undo_btn.entered.connect(self.buttonHover)
         undo_btn.leaved.connect(self.buttonStopHovering)
 
     # This is where the card images will be attached to
@@ -238,7 +252,6 @@ class APP(QWidget):
         # the list of widgets to be returned
         image_widgets = []
         # the starting position on the qt5 canvas
-        start_pos = [700,75]
         # creates an object for however long the list is
         for count in range(amount):
             # initialize the object
@@ -248,7 +261,7 @@ class APP(QWidget):
             # attaches image to object via path
             label.setPixmap(pixmap)
             # moves each image so that corner where card value is displayed
-            label.move(start_pos[0]-(50*count), start_pos[1]+(50*count))
+            label.move(self.deck_pos_start_x-(self.card_offset*count), self.deck_pos_start_y+(self.card_offset*count))
             # lowers the objects view priority so the stack of images is decending
             label.lower()
             # adds item to list
@@ -256,18 +269,16 @@ class APP(QWidget):
         return image_widgets
     
     def initHoverPicture(self):
+        arrow_size = self.card_offset
         # initialize the object
         arrow = QLabel(self)
         # sets image path
         pixmap = QPixmap('pictures\\arrow.png')
-        pixmap = pixmap.scaled(50, 50)
-        # attaches image to object via path
+        pixmap = pixmap.scaled(arrow_size, arrow_size)
         arrow.setPixmap(pixmap)
         arrow.resize(pixmap.width(), pixmap.height())
-        # moves each image so that corner where card value is displayed
-        arrow.move(700,25)
-        # lowers the objects view priority so the stack of images is decending
-        arrow.lower()
+        arrow.move(self.deck_pos_start_x,self.deck_pos_start_y-arrow_size)
+        arrow.setVisible(False)
 
         return arrow
     
