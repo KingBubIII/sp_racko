@@ -3,18 +3,21 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 
+# this class makes up the elements in the linked list class
 class NODE:
     def __init__(self, value:int) -> None:
         self.value = value
         self.next = None
         self.image_path = 'pictures\\{0}_card.png'.format(self.value)
 
+# this class is for logic that manipulates the order of the nodes
 class LINKEDLIST:
     def __init__(self) -> None:
         self.head = None
         self.tail = self.head
         self.length = 0
 
+    # prints out list in a easily readable format for debugging
     def __str__(self):
         curr_node = self.head
         myArr = ""
@@ -27,6 +30,7 @@ class LINKEDLIST:
             curr_node = curr_node.next
         return str(myArr)
 
+    # retieves node element at index
     def Traverse(self, target):
         index = 0
         curr_node = self.head
@@ -37,6 +41,7 @@ class LINKEDLIST:
 
         return curr_node
     
+    # adds new node with a value at end of list
     def append(self, new_value):
         new_node = NODE(new_value)
         if self.tail is None:
@@ -47,6 +52,7 @@ class LINKEDLIST:
             self.tail = new_node
         self.length += 1
     
+    # adds new node with a value at beginning of list
     def prepend(self, new_value):
         new_node = NODE(new_value)
         new_node.next = self.head
@@ -56,6 +62,7 @@ class LINKEDLIST:
         if self.length == 1:
             self.tail = self.head
 
+    # adds new node with a value at index in list
     def insert(self, targetI, new_value):        
         new_node = NODE(new_value)
         pre = self.Traverse(targetI-1)
@@ -66,6 +73,7 @@ class LINKEDLIST:
         self.length += 1
         return
 
+    # removes node at index in list
     def remove(self, index):
         if index > 0:
             pre = self.Traverse(index-1)
@@ -83,20 +91,10 @@ class LINKEDLIST:
         elif self.length == 0:
             self.tail = None
         return temp
-    
-    def reverse(self):
-        currNode = self.head
-        prevNode = None
-        while self.tail.next == None:
-            temp_node = curr_node.next
-            curr_node.next = prevNode
 
-            prevNode = curr_node
-            curr_node = temp_node
-        temp_node = self.head
-        self.head = self.tail
-        self.tail = temp_node
-
+    # moves list head element to an index of it's value plus one
+    #               before                  after
+    # example: list = [2, 4, 1, 3] --> list = [4, 1, 2, 3]
     def topToNPlusOne(self):
         index = (self.head.value) % self.length
         if index > 0:
@@ -115,6 +113,7 @@ class LINKEDLIST:
 
         return index
     
+    #  moves list head node to bottom of list
     def topToBottom(self):
         temp = self.head
         self.head = temp.next
@@ -124,6 +123,8 @@ class LINKEDLIST:
 
         return self.length-1
     
+    # checks to see if all nodes are in order
+    # either ascending or descending
     def winCheck(self):
         win = True
         curr_node = self.head
@@ -142,10 +143,14 @@ class LINKEDLIST:
         
         return win
 
+    # undos last move by removing node at index
+    # then adding the value of removed node back on top of list
     def undo(self, index):
         temp_val = self.remove(index)
         self.prepend(temp_val)
 
+# creates custom qt5 button class 
+# add functionality for hovering mouse on button in GUI 
 class BUTTON(QPushButton):
     entered = pyqtSignal()
     leaved = pyqtSignal()
@@ -158,6 +163,7 @@ class BUTTON(QPushButton):
         super().leaveEvent(event)
         self.leaved.emit()
 
+# creates custom qt5 class
 class APP(QWidget):
     def __init__(self, deck, undo_stack):
         super().__init__()
@@ -173,78 +179,114 @@ class APP(QWidget):
         self.refenceDeck = deck
         self.undo_stack = undo_stack
         self.pictureWidgets = self.initNodePictures(self.refenceDeck.length)
-        self.hover_arrow = self.initHoverPicture()
+        self.hover_arrow = self.initHoverIndicator()
+        
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
 
+    # handles all event calling for clicking N+1 button
     @pyqtSlot()
     def nPlusOne_on_click(self):
+        # gets new index of moved node
         index = self.refenceDeck.topToNPlusOne()
+        # adds index as value to undo stack
         self.addToUndoStack(index)
+        # update deck visuals
         self.showDeck()
+        # checks for win/if all nodes are in order
         if self.refenceDeck.winCheck():
             self.close()
+        # redo hover event
         self.nPlusOneButtonHover()
 
+    # handles all event calling for clicking bottom button
     @pyqtSlot()
     def bottom_on_click(self):
+        # gets new index of moved node
         index = self.refenceDeck.topToBottom()
+        # adds index as value to undo stack
         self.addToUndoStack(index)
+        # update deck visuals
         self.showDeck()
+        # checks for win/if all nodes are in order
         if self.refenceDeck.winCheck():
             self.close()
+        # redo hover event
         self.bottomButtonHover()
 
+    # handles all event calling for undo button click
     @pyqtSlot()
     def undo_on_click(self):
-        # print(self.undo_stack.length)
+        # checks that there is an event to undo
         if self.undo_stack.length > 0:
+            # passes index value from removed undo stack node to undo meathod
             self.refenceDeck.undo(self.undo_stack.remove(0))
         else:
             print("You have nothing left to undo. Remember the max you can undo at one time is 3.")
-
+        # update deck visuals
         self.showDeck()
 
+    # calculates position of next position indicator image to be at the bottom of the stack
     def bottomButtonHover(self):
+        # calculates x position
         x = self.deck_pos_start_x-(self.card_offset*(self.refenceDeck.length-1))
+        # calcuates y position
         y = (self.deck_pos_start_y+(self.card_offset*(self.refenceDeck.length-1)))-self.card_offset
+        # moves indicator image to position
         self.hover_arrow.move(x, y)
+        # shows image
         self.hover_arrow.setVisible(True)
 
+    # calculates position of next position indicator image to be at n+1 the value of the stack head
     def nPlusOneButtonHover(self):
+        # calculates x position
         x = self.deck_pos_start_x-(self.card_offset*(self.refenceDeck.head.value % self.refenceDeck.length))
+        # calcuates y position
         y = (self.deck_pos_start_y+(self.card_offset*(self.refenceDeck.head.value % self.refenceDeck.length)))-self.card_offset
+        # moves indicator image to position
         self.hover_arrow.move(x, y)
+        # shows image
         self.hover_arrow.setVisible(True)
 
+    # when leaving button turn off indicator image visabllity 
     def buttonStopHovering(self):
         self.hover_arrow.setVisible(False)
 
+    # creates three buttons to manipulate the deck and attach event handlers to meathods
     def initButtons(self):
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
-        # self.show()
-
+        # top to bottom button
         bottom_btn = BUTTON(self)
         bottom_btn.setText('Node to Bottom')
-        bottom_btn.setToolTip('This is an example button')
+        bottom_btn.setToolTip('Moves current node to bottom of deck')
         bottom_btn.move(100,70)
+        # attaches meathod to click event
         bottom_btn.clicked.connect(self.bottom_on_click)
+        # attaches meathod to enter hover event
         bottom_btn.entered.connect(self.bottomButtonHover)
+        # attaches meathod to stop hover event
         bottom_btn.leaved.connect(self.buttonStopHovering)
 
+        # top to n+1 button
         nPlusOne_btn = BUTTON(self)
         nPlusOne_btn.setText('Node to N+1')
         nPlusOne_btn.setToolTip('Put current node on bottom of stack')
         nPlusOne_btn.move(100,140)
+        # attaches meathod to click event
         nPlusOne_btn.clicked.connect(self.nPlusOne_on_click)
+        # attaches meathod to enter hover event
         nPlusOne_btn.entered.connect(self.nPlusOneButtonHover)
+        # attaches meathod to stop hover event
         nPlusOne_btn.leaved.connect(self.buttonStopHovering)
 
+        # undo button
         undo_btn = BUTTON(self)
         undo_btn.setText('Undo')
         undo_btn.setToolTip('Put last node moved back ontop of deck')
         undo_btn.move(100,210)
+        # attaches meathod to click event
         undo_btn.clicked.connect(self.undo_on_click)
         # undo_btn.entered.connect(self.buttonHover)
+        # attaches meathod to stop hover event
         undo_btn.leaved.connect(self.buttonStopHovering)
 
     # This is where the card images will be attached to
@@ -268,20 +310,25 @@ class APP(QWidget):
             image_widgets.append(label)
         return image_widgets
     
-    def initHoverPicture(self):
+    # creates picture object for indicating where next node will go 
+    def initHoverIndicator(self):
         arrow_size = self.card_offset
         # initialize the object
         arrow = QLabel(self)
         # sets image path
         pixmap = QPixmap('pictures\\arrow.png')
+        # resize image object to fit inbetween cards
         pixmap = pixmap.scaled(arrow_size, arrow_size)
+        # attach picture to object 
         arrow.setPixmap(pixmap)
-        arrow.resize(pixmap.width(), pixmap.height())
+        # move object to default position
         arrow.move(self.deck_pos_start_x,self.deck_pos_start_y-arrow_size)
+        # turn off visabilty
         arrow.setVisible(False)
 
         return arrow
     
+    # sets image objects equal to corisponding node value images
     def showDeck(self):
         curr = self.refenceDeck.head
         for object in self.pictureWidgets:
@@ -291,8 +338,13 @@ class APP(QWidget):
         
         return
     
+    # logic to keep the undo stack 'memory' to a defined maximum
+    # default is 3
     def addToUndoStack(self, index):
+        # checks if there are already 3 nodes
         if self.undo_stack.length >= 3:
+            # removes last node 
             self.undo_stack.remove(2)
 
+        # add new value node
         self.undo_stack.prepend(index)
