@@ -197,6 +197,7 @@ class APP(QWidget):
         if self.refenceDeck.winCheck():
             self.close()
         # redo hover event
+        self.buttonStopHovering()
         self.nPlusOneButtonHover()
 
     # handles all event calling for clicking bottom button
@@ -212,6 +213,7 @@ class APP(QWidget):
         if self.refenceDeck.winCheck():
             self.close()
         # redo hover event
+        self.buttonStopHovering()
         self.bottomButtonHover()
 
     # handles all event calling for undo button click
@@ -225,9 +227,12 @@ class APP(QWidget):
             print("You have nothing left to undo. Remember the max you can undo at one time is 3.")
         # update deck visuals
         self.showDeck()
+        self.buttonStopHovering()
+        self.undoButtonHover()
 
     # calculates position of next position indicator image to be at the bottom of the stack
     def bottomButtonHover(self):
+        self.pictureWidgets[0].setStyleSheet("border: 3px solid red;")
         # calculates x position
         x = self.deck_pos_start_x-(self.card_offset*(self.refenceDeck.length-1))
         # calcuates y position
@@ -239,6 +244,7 @@ class APP(QWidget):
 
     # calculates position of next position indicator image to be at n+1 the value of the stack head
     def nPlusOneButtonHover(self):
+        self.pictureWidgets[0].setStyleSheet("border: 3px solid red;")
         # calculates x position
         x = self.deck_pos_start_x-(self.card_offset*(self.refenceDeck.head.value % self.refenceDeck.length))
         # calcuates y position
@@ -248,9 +254,17 @@ class APP(QWidget):
         # shows image
         self.hover_arrow.setVisible(True)
 
+    def undoButtonHover(self):
+        if not self.undo_stack.head is None:
+            self.pictureWidgets[self.undo_stack.head.value].setStyleSheet("border: 3px solid red;")
+            self.hover_arrow.move(self.deck_pos_start_x, self.deck_pos_start_y-self.card_offset)
+            self.hover_arrow.setVisible(True)
+
     # when leaving button turn off indicator image visabllity 
     def buttonStopHovering(self):
         self.hover_arrow.setVisible(False)
+        for image in self.pictureWidgets:
+            image.setStyleSheet("border: 0px solid red;")
 
     # creates three buttons to manipulate the deck and attach event handlers to meathods
     def initButtons(self):
@@ -285,8 +299,7 @@ class APP(QWidget):
         undo_btn.move(100,210)
         # attaches meathod to click event
         undo_btn.clicked.connect(self.undo_on_click)
-        # undo_btn.entered.connect(self.buttonHover)
-        # attaches meathod to stop hover event
+        undo_btn.entered.connect(self.undoButtonHover)
         undo_btn.leaved.connect(self.buttonStopHovering)
 
     # This is where the card images will be attached to

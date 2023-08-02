@@ -27,7 +27,7 @@ if __name__ == __name__:
     # initilize qt5 application
     app = QApplication(sys.argv)
     # initilize linked lists
-    undo_stack, deck = setup(size=4)
+    undo_stack, deck = setup(size=6)
     # create main game window
     game_window = APP(deck, undo_stack)
     
