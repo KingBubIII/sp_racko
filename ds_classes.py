@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
+import random
 
 # this class makes up the elements in the linked list class
 class NODE:
@@ -16,6 +17,8 @@ class LINKEDLIST:
         self.head = None
         self.tail = self.head
         self.length = 0
+
+        self.shift = 0
 
     # prints out list in a easily readable format for debugging
     def __str__(self):
@@ -96,7 +99,7 @@ class LINKEDLIST:
     #               before                  after
     # example: list = [2, 4, 1, 3] --> list = [4, 1, 2, 3]
     def topToNPlusOne(self):
-        index = (self.head.value) % self.length
+        index = (self.head.value + self.shift) % self.length
         if index > 0:
             pre = self.head
             for count in range(index):
@@ -148,6 +151,9 @@ class LINKEDLIST:
     def undo(self, index):
         temp_val = self.remove(index)
         self.prepend(temp_val)
+
+    def randomize_shift(self):
+        self.shift = random.randint(-1,1)
 
 # creates custom qt5 button class 
 # add functionality for hovering mouse on button in GUI 
@@ -246,9 +252,9 @@ class APP(QWidget):
     def nPlusOneButtonHover(self):
         self.pictureWidgets[0].setStyleSheet("border: 3px solid red;")
         # calculates x position
-        x = self.deck_pos_start_x-(self.card_offset*(self.refenceDeck.head.value % self.refenceDeck.length))
+        x = self.deck_pos_start_x-(self.card_offset*((self.refenceDeck.head.value + self.refenceDeck.shift) % self.refenceDeck.length))
         # calcuates y position
-        y = (self.deck_pos_start_y+(self.card_offset*(self.refenceDeck.head.value % self.refenceDeck.length)))-self.card_offset
+        y = (self.deck_pos_start_y+(self.card_offset*((self.refenceDeck.head.value + self.refenceDeck.shift) % self.refenceDeck.length)))-self.card_offset
         # moves indicator image to position
         self.hover_arrow.move(x, y)
         # shows image
@@ -358,6 +364,8 @@ class APP(QWidget):
         if self.undo_stack.length >= 3:
             # removes last node 
             self.undo_stack.remove(2)
+            self.refenceDeck.randomize_shift()
+            print(self.refenceDeck.shift)
 
         # add new value node
         self.undo_stack.prepend(index)
