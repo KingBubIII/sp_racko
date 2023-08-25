@@ -172,13 +172,16 @@ class APP(QWidget):
         self.top = 100
         self.width = 1000
         self.height = 750
-        self.deck_pos_start_x = 700
-        self.deck_pos_start_y = 75
+        self.deck_pos_start_x = 300
+        self.deck_pos_start_y = 100
+        self.supply_pos_x = 700
+        self.supply_pos_y = 50
         self.card_offset = 50
         self.initButtons()
         self.refenceDeck = deck
         self.undo_stack = undo_stack
-        self.pictureWidgets = self.initNodePictures(self.refenceDeck.length)
+        self.sorted_deck_images = self.initSortedDeckWidgets(self.refenceDeck.length)
+        self.supply_card_widget = self.initSupplyCardWidget()
         self.hover_arrow = self.initHoverIndicator()
         
         self.setWindowTitle(self.title)
@@ -232,7 +235,7 @@ class APP(QWidget):
 
     # calculates position of next position indicator image to be at the bottom of the stack
     def bottomButtonHover(self):
-        self.pictureWidgets[0].setStyleSheet("border: 3px solid red;")
+        self.sorted_deck_images[0].setStyleSheet("border: 3px solid red;")
         # calculates x position
         x = self.deck_pos_start_x-(self.card_offset*(self.refenceDeck.length-1))
         # calcuates y position
@@ -244,7 +247,7 @@ class APP(QWidget):
 
     # calculates position of next position indicator image to be at n+1 the value of the stack head
     def nPlusOneButtonHover(self):
-        self.pictureWidgets[0].setStyleSheet("border: 3px solid red;")
+        self.sorted_deck_images[0].setStyleSheet("border: 3px solid red;")
         # calculates x position
         x = self.deck_pos_start_x-(self.card_offset*(self.refenceDeck.head.value % self.refenceDeck.length))
         # calcuates y position
@@ -256,14 +259,14 @@ class APP(QWidget):
 
     def undoButtonHover(self):
         if not self.undo_stack.head is None:
-            self.pictureWidgets[self.undo_stack.head.value].setStyleSheet("border: 3px solid red;")
+            self.sorted_deck_images[self.undo_stack.head.value].setStyleSheet("border: 3px solid red;")
             self.hover_arrow.move(self.deck_pos_start_x, self.deck_pos_start_y-self.card_offset)
             self.hover_arrow.setVisible(True)
 
     # when leaving button turn off indicator image visabllity 
     def buttonStopHovering(self):
         self.hover_arrow.setVisible(False)
-        for image in self.pictureWidgets:
+        for image in self.sorted_deck_images:
             image.setStyleSheet("border: 0px solid red;")
 
     # creates three buttons to manipulate the deck and attach event handlers to meathods
@@ -302,26 +305,35 @@ class APP(QWidget):
         undo_btn.entered.connect(self.undoButtonHover)
         undo_btn.leaved.connect(self.buttonStopHovering)
 
+    def initPictureWidget(self, x, y, value = None):
+        # initialize the object
+        label = QLabel(self)
+        # sets image path
+        pixmap = QPixmap("pictures\\{0}_card.png".format(value))
+        # attaches image to object via path
+        label.setPixmap(pixmap)
+        # moves each image so that corner where card value is displayed
+        label.move(x, y)
+
+        return label
+
     # This is where the card images will be attached to
-    def initNodePictures(self, amount = 1):
+    def initSortedDeckWidgets(self, amount = 1):
         # the list of widgets to be returned
         image_widgets = []
         # the starting position on the qt5 canvas
         # creates an object for however long the list is
         for count in range(amount):
-            # initialize the object
-            label = QLabel(self)
-            # sets image path
-            pixmap = QPixmap()
-            # attaches image to object via path
-            label.setPixmap(pixmap)
-            # moves each image so that corner where card value is displayed
-            label.move(self.deck_pos_start_x-(self.card_offset*count), self.deck_pos_start_y+(self.card_offset*count))
+            picture_widget = self.initPictureWidget(self.deck_pos_start_x-(self.card_offset*count), self.deck_pos_start_y+(self.card_offset*count))
             # lowers the objects view priority so the stack of images is decending
-            label.lower()
+            picture_widget.lower()
             # adds item to list
-            image_widgets.append(label)
+            image_widgets.append(picture_widget)
         return image_widgets
+    
+    def initSupplyCardWidget(self):
+        picture_widget = self.initPictureWidget(self.supply_pos_x, self.supply_pos_y)
+        return picture_widget
     
     # creates picture object for indicating where next node will go 
     def initHoverIndicator(self):
@@ -344,7 +356,7 @@ class APP(QWidget):
     # sets image objects equal to corisponding node value images
     def showDeck(self):
         curr = self.refenceDeck.head
-        for object in self.pictureWidgets:
+        for object in self.sorted_deck_images:
             pixmap = QPixmap(curr.image_path)
             object.setPixmap(pixmap)
             curr = curr.next
