@@ -95,8 +95,9 @@ class LINKEDLIST:
     # moves list head element to an index of it's value plus one
     #               before                  after
     # example: list = [2, 4, 1, 3] --> list = [4, 1, 2, 3]
-    def topToNPlusOne(self):
-        index = (self.head.value) % self.length
+    def topToNPlusM(self):
+        # print(self.head.value, self.head.next.value)
+        index = (self.head.value + self.head.next.value) % (self.length+1)
         if index > 0:
             pre = self.head
             for count in range(index):
@@ -113,13 +114,12 @@ class LINKEDLIST:
 
         return index
     
-    #  moves list head node to bottom of list
-    def topToBottom(self):
+    #  moves list head node to swap of list
+    def topToSwap(self):
         temp = self.head
         self.head = temp.next
-        temp.next = self.tail.next
-        self.tail.next = temp
-        self.tail = temp
+        temp.next = self.head.next
+        self.head.next = temp
 
         return self.length-1
     
@@ -186,9 +186,9 @@ class APP(QWidget):
 
     # handles all event calling for clicking N+1 button
     @pyqtSlot()
-    def nPlusOne_on_click(self):
+    def nPlusM_on_click(self):
         # gets new index of moved node
-        index = self.refenceDeck.topToNPlusOne()
+        index = self.refenceDeck.topToNPlusM()
         # adds index as value to undo stack
         self.addToUndoStack(index)
         # update deck visuals
@@ -198,13 +198,13 @@ class APP(QWidget):
             self.close()
         # redo hover event
         self.buttonStopHovering()
-        self.nPlusOneButtonHover()
+        self.nPlusMButtonHover()
 
-    # handles all event calling for clicking bottom button
+    # handles all event calling for clicking swap button
     @pyqtSlot()
-    def bottom_on_click(self):
+    def swap_on_click(self):
         # gets new index of moved node
-        index = self.refenceDeck.topToBottom()
+        index = self.refenceDeck.topToSwap()
         # adds index as value to undo stack
         self.addToUndoStack(index)
         # update deck visuals
@@ -214,7 +214,7 @@ class APP(QWidget):
             self.close()
         # redo hover event
         self.buttonStopHovering()
-        self.bottomButtonHover()
+        self.swapButtonHover()
 
     # handles all event calling for undo button click
     @pyqtSlot()
@@ -230,8 +230,8 @@ class APP(QWidget):
         self.buttonStopHovering()
         self.undoButtonHover()
 
-    # calculates position of next position indicator image to be at the bottom of the stack
-    def bottomButtonHover(self):
+    # calculates position of next position indicator image to be at the swap of the stack
+    def swapButtonHover(self):
         self.pictureWidgets[0].setStyleSheet("border: 3px solid red;")
         # calculates x position
         x = self.deck_pos_start_x-(self.card_offset*(self.refenceDeck.length-1))
@@ -243,12 +243,12 @@ class APP(QWidget):
         self.hover_arrow.setVisible(True)
 
     # calculates position of next position indicator image to be at n+1 the value of the stack head
-    def nPlusOneButtonHover(self):
+    def nPlusMButtonHover(self):
         self.pictureWidgets[0].setStyleSheet("border: 3px solid red;")
         # calculates x position
-        x = self.deck_pos_start_x-(self.card_offset*(self.refenceDeck.head.value % self.refenceDeck.length))
+        x = self.deck_pos_start_x-(self.card_offset*((self.refenceDeck.head.value + self.refenceDeck.head.next.value) % self.refenceDeck.length))
         # calcuates y position
-        y = (self.deck_pos_start_y+(self.card_offset*(self.refenceDeck.head.value % self.refenceDeck.length)))-self.card_offset
+        y = (self.deck_pos_start_y+(self.card_offset*((self.refenceDeck.head.value + self.refenceDeck.head.next.value) % self.refenceDeck.length)))-self.card_offset
         # moves indicator image to position
         self.hover_arrow.move(x, y)
         # shows image
@@ -268,29 +268,29 @@ class APP(QWidget):
 
     # creates three buttons to manipulate the deck and attach event handlers to meathods
     def initButtons(self):
-        # top to bottom button
-        bottom_btn = BUTTON(self)
-        bottom_btn.setText('Node to Bottom')
-        bottom_btn.setToolTip('Moves current node to bottom of deck')
-        bottom_btn.move(100,70)
+        # top to swap button
+        swap_btn = BUTTON(self)
+        swap_btn.setText('Swap cards')
+        swap_btn.setToolTip('Moves current node to swap of deck')
+        swap_btn.move(100,70)
         # attaches meathod to click event
-        bottom_btn.clicked.connect(self.bottom_on_click)
+        swap_btn.clicked.connect(self.swap_on_click)
         # attaches meathod to enter hover event
-        bottom_btn.entered.connect(self.bottomButtonHover)
+        swap_btn.entered.connect(self.swapButtonHover)
         # attaches meathod to stop hover event
-        bottom_btn.leaved.connect(self.buttonStopHovering)
+        swap_btn.leaved.connect(self.buttonStopHovering)
 
         # top to n+1 button
-        nPlusOne_btn = BUTTON(self)
-        nPlusOne_btn.setText('Node to N+1')
-        nPlusOne_btn.setToolTip('Put current node on bottom of stack')
-        nPlusOne_btn.move(100,140)
+        nPlusM_btn = BUTTON(self)
+        nPlusM_btn.setText('Node to N+M')
+        nPlusM_btn.setToolTip('Put current node on swap of stack')
+        nPlusM_btn.move(100,140)
         # attaches meathod to click event
-        nPlusOne_btn.clicked.connect(self.nPlusOne_on_click)
+        nPlusM_btn.clicked.connect(self.nPlusM_on_click)
         # attaches meathod to enter hover event
-        nPlusOne_btn.entered.connect(self.nPlusOneButtonHover)
+        nPlusM_btn.entered.connect(self.nPlusMButtonHover)
         # attaches meathod to stop hover event
-        nPlusOne_btn.leaved.connect(self.buttonStopHovering)
+        nPlusM_btn.leaved.connect(self.buttonStopHovering)
 
         # undo button
         undo_btn = BUTTON(self)
