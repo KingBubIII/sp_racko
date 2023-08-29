@@ -181,87 +181,59 @@ class APP(QWidget):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-    # handles all event calling for clicking N+1 button
     @pyqtSlot()
-    def nPlusOne_on_click(self):
-        # gets new index of moved node
-        index = self.refence_deck.topToNPlusOne()
-        # update deck visuals
-        self.showDeck()
-        # checks for win/if all nodes are in order
-        if self.refence_deck.winCheck():
-            self.close()
-        # redo hover event
-        self.buttonStopHovering()
-        self.nPlusOneButtonHover()
+    def stackFromSupply(self):
+        if self.supply_deck.head == None:
+            print('There are no more cards left in supply pile')
+        else:
+            self.refence_deck.prepend(self.supply_deck.remove(0))
+            self.showDecks()
+            self.stackFromSupplyHover()
 
-    # handles all event calling for clicking bottom button
     @pyqtSlot()
-    def bottom_on_click(self):
-        # gets new index of moved node
-        index = self.refence_deck.topToBottom()
-        # update deck visuals
-        self.showDeck()
-        # checks for win/if all nodes are in order
-        if self.refence_deck.winCheck():
-            self.close()
-        # redo hover event
-        self.buttonStopHovering()
-        self.bottomButtonHover()
+    def queueFromSupply(self):
+        if self.supply_deck.head == None:
+            print('There are no more cards left in supply pile')
+        else:
+            self.refence_deck.append(self.supply_deck.remove(0))
+            self.showDecks()
+            self.stackFromSupplyHover()
+        
+    @pyqtSlot()
+    def stackFromSupplyHover(self):
+        pass
 
-    # calculates position of next position indicator image to be at the bottom of the stack
-    def bottomButtonHover(self):
-        self.sorted_deck_images[0].setStyleSheet("border: 3px solid red;")
-        # calculates x position
-        x = self.deck_pos_start_x-(self.card_offset*(self.refence_deck.length-1))
-        # calcuates y position
-        y = (self.deck_pos_start_y+(self.card_offset*(self.refence_deck.length-1)))-self.card_offset
-        # moves indicator image to position
-        self.hover_arrow.move(x, y)
-        # shows image
-        self.hover_arrow.setVisible(True)
-
-    # calculates position of next position indicator image to be at n+1 the value of the stack head
-    def nPlusOneButtonHover(self):
-        self.sorted_deck_images[0].setStyleSheet("border: 3px solid red;")
-        # calculates x position
-        x = self.deck_pos_start_x-(self.card_offset*(self.refence_deck.head.value % self.refence_deck.length))
-        # calcuates y position
-        y = (self.deck_pos_start_y+(self.card_offset*(self.refence_deck.head.value % self.refence_deck.length)))-self.card_offset
-        # moves indicator image to position
-        self.hover_arrow.move(x, y)
-        # shows image
-        self.hover_arrow.setVisible(True)
+    @pyqtSlot()
+    def queueFromSupplyHover(self):
+        pass
 
     # when leaving button turn off indicator image visabllity 
     def buttonStopHovering(self):
         self.hover_arrow.setVisible(False)
-        for image in self.sorted_deck_images:
-            image.setStyleSheet("border: 0px solid red;")
 
     # creates three buttons to manipulate the deck and attach event handlers to meathods
     def initButtons(self):
         # top to bottom button
         bottom_btn = BUTTON(self)
-        bottom_btn.setText('Node to Bottom')
-        bottom_btn.setToolTip('Moves current node to bottom of deck')
+        bottom_btn.setText('Queue')
+        bottom_btn.setToolTip('Moves top supply card to bottom of deck')
         bottom_btn.move(100,70)
         # attaches meathod to click event
-        bottom_btn.clicked.connect(self.bottom_on_click)
+        bottom_btn.clicked.connect(self.queueFromSupply)
         # attaches meathod to enter hover event
-        bottom_btn.entered.connect(self.bottomButtonHover)
+        bottom_btn.entered.connect(self.queueFromSupplyHover)
         # attaches meathod to stop hover event
         bottom_btn.leaved.connect(self.buttonStopHovering)
 
         # top to n+1 button
         nPlusOne_btn = BUTTON(self)
-        nPlusOne_btn.setText('Node to N+1')
-        nPlusOne_btn.setToolTip('Put current node on bottom of stack')
+        nPlusOne_btn.setText('Stack')
+        nPlusOne_btn.setToolTip('Moves top supply card to top of deck')
         nPlusOne_btn.move(100,140)
         # attaches meathod to click event
-        nPlusOne_btn.clicked.connect(self.nPlusOne_on_click)
+        nPlusOne_btn.clicked.connect(self.stackFromSupply)
         # attaches meathod to enter hover event
-        nPlusOne_btn.entered.connect(self.nPlusOneButtonHover)
+        nPlusOne_btn.entered.connect(self.stackFromSupplyHover)
         # attaches meathod to stop hover event
         nPlusOne_btn.leaved.connect(self.buttonStopHovering)
 
@@ -321,5 +293,9 @@ class APP(QWidget):
             pixmap = QPixmap(curr.image_path)
             self.sorted_deck_images[node_index].setPixmap(pixmap)
             curr = curr.next
-        self.supply_card_widget.setPixmap(QPixmap(self.supply_deck.head.image_path))
+            node_index+=1
+        if self.supply_deck.head == None:
+            self.supply_card_widget.setPixmap(QPixmap("pictures\\None_card.png"))
+        else:
+            self.supply_card_widget.setPixmap(QPixmap(self.supply_deck.head.image_path))
         return
