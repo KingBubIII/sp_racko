@@ -125,7 +125,7 @@ class LINKEDLIST:
     
     # checks to see if all nodes are in order
     # either ascending or descending
-    def winCheck(self):
+    def inOrder(self):
         win = True
         curr_node = self.head
         if curr_node.next.value > curr_node.value:
@@ -188,6 +188,7 @@ class APP(QWidget):
         else:
             self.refence_deck.prepend(self.supply_deck.remove(0))
             self.showDecks()
+            self.winCheck()
             self.stackFromSupplyHover()
 
     @pyqtSlot()
@@ -197,13 +198,32 @@ class APP(QWidget):
         else:
             self.refence_deck.append(self.supply_deck.remove(0))
             self.showDecks()
+            self.winCheck()
             self.queueFromSupplyHover()
+
+    @pyqtSlot()
+    def popFromUserSorted(self):
+        if self.refence_deck.head == None:
+            print('There are no more cards left in sorted pile')
+        else:
+            self.supply_deck.append(self.refence_deck.remove(0))
+            self.showDecks()
+            self.popFromUserSortedHover()
         
     @pyqtSlot()
     def stackFromSupplyHover(self):
         if not self.supply_deck.head == None:
             self.supply_card_widget.setStyleSheet("border: 3px solid red;")
             self.hover_arrow.move(self.deck_pos_start_x, self.deck_pos_start_y-self.card_offset)
+            self.hover_arrow.show()
+        else:
+            self.buttonStopHovering()
+
+    @pyqtSlot()
+    def popFromUserSortedHover(self):
+        if not self.refence_deck.head == None:
+            self.sorted_deck_images[0].setStyleSheet("border: 3px solid red;")
+            self.hover_arrow.move(self.supply_pos_x, self.supply_pos_y-self.card_offset)
             self.hover_arrow.show()
         else:
             self.buttonStopHovering()
@@ -226,28 +246,39 @@ class APP(QWidget):
     # creates three buttons to manipulate the deck and attach event handlers to meathods
     def initButtons(self):
         # top to bottom button
-        bottom_btn = BUTTON(self)
-        bottom_btn.setText('Queue')
-        bottom_btn.setToolTip('Moves top supply card to bottom of deck')
-        bottom_btn.move(100,70)
+        queue_btn = BUTTON(self)
+        queue_btn.setText('Queue')
+        queue_btn.setToolTip('Moves top supply card to bottom of deck')
+        queue_btn.move(100,70)
         # attaches meathod to click event
-        bottom_btn.clicked.connect(self.queueFromSupply)
+        queue_btn.clicked.connect(self.queueFromSupply)
         # attaches meathod to enter hover event
-        bottom_btn.entered.connect(self.queueFromSupplyHover)
+        queue_btn.entered.connect(self.queueFromSupplyHover)
         # attaches meathod to stop hover event
-        bottom_btn.leaved.connect(self.buttonStopHovering)
+        queue_btn.leaved.connect(self.buttonStopHovering)
 
         # top to n+1 button
-        nPlusOne_btn = BUTTON(self)
-        nPlusOne_btn.setText('Stack')
-        nPlusOne_btn.setToolTip('Moves top supply card to top of deck')
-        nPlusOne_btn.move(100,140)
+        stack_btn = BUTTON(self)
+        stack_btn.setText('Stack')
+        stack_btn.setToolTip('Moves top supply card to top of deck')
+        stack_btn.move(100,140)
         # attaches meathod to click event
-        nPlusOne_btn.clicked.connect(self.stackFromSupply)
+        stack_btn.clicked.connect(self.stackFromSupply)
         # attaches meathod to enter hover event
-        nPlusOne_btn.entered.connect(self.stackFromSupplyHover)
+        stack_btn.entered.connect(self.stackFromSupplyHover)
         # attaches meathod to stop hover event
-        nPlusOne_btn.leaved.connect(self.buttonStopHovering)
+        stack_btn.leaved.connect(self.buttonStopHovering)
+
+        pop_btn = BUTTON(self)
+        pop_btn.setText('Pop')
+        pop_btn.setToolTip('removes top most card of the user sorted pile and adds it to bottom of supply pile')
+        pop_btn.move(self.supply_pos_x, self.supply_pos_y+600)
+        # attaches meathod to click event
+        pop_btn.clicked.connect(self.popFromUserSorted)
+        # attaches meathod to enter hover event
+        pop_btn.entered.connect(self.popFromUserSortedHover)
+        # attaches meathod to stop hover event
+        pop_btn.leaved.connect(self.buttonStopHovering)
 
     def initPictureWidget(self, x, y, value = None):
         # initialize the object
@@ -300,14 +331,22 @@ class APP(QWidget):
     # sets image objects equal to corisponding node value images
     def showDecks(self):
         curr = self.refence_deck.head
-        node_index = 0
-        while not curr == None: 
-            pixmap = QPixmap(curr.image_path)
-            self.sorted_deck_images[node_index].setPixmap(pixmap)
-            curr = curr.next
-            node_index+=1
+        for image in self.sorted_deck_images:
+            if curr == None:
+                temp_image_path = "pictures\\None_card.png"
+            else:
+                temp_image_path= curr.image_path
+            pixmap = QPixmap(temp_image_path)
+            image.setPixmap(pixmap)
+            if not curr == None:
+                curr = curr.next
         if self.supply_deck.head == None:
             self.supply_card_widget.setPixmap(QPixmap("pictures\\None_card.png"))
         else:
             self.supply_card_widget.setPixmap(QPixmap(self.supply_deck.head.image_path))
+        
         return
+    
+    def winCheck(self):
+        if self.refence_deck.inOrder() and self.refence_deck.length == len(self.sorted_deck_images):
+            self.close()
