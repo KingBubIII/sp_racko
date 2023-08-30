@@ -197,18 +197,30 @@ class APP(QWidget):
         else:
             self.refence_deck.append(self.supply_deck.remove(0))
             self.showDecks()
-            self.stackFromSupplyHover()
+            self.queueFromSupplyHover()
         
     @pyqtSlot()
     def stackFromSupplyHover(self):
-        pass
+        if not self.supply_deck.head == None:
+            self.supply_card_widget.setStyleSheet("border: 3px solid red;")
+            self.hover_arrow.move(self.deck_pos_start_x, self.deck_pos_start_y-self.card_offset)
+            self.hover_arrow.show()
+        else:
+            self.buttonStopHovering()
 
     @pyqtSlot()
     def queueFromSupplyHover(self):
-        pass
+        if not self.supply_deck.head == None:
+            self.supply_card_widget.setStyleSheet("border: 3px solid red;")
+            self.hover_arrow.move( (self.deck_pos_start_x - (self.card_offset*self.refence_deck.length)) , (self.deck_pos_start_y+(self.card_offset*(self.refence_deck.length-1))) )
+            self.hover_arrow.show()
+        else:
+            self.buttonStopHovering()
 
     # when leaving button turn off indicator image visabllity 
     def buttonStopHovering(self):
+        self.supply_card_widget.setStyleSheet("")
+        self.sorted_deck_images[0].setStyleSheet("")
         self.hover_arrow.setVisible(False)
 
     # creates three buttons to manipulate the deck and attach event handlers to meathods
